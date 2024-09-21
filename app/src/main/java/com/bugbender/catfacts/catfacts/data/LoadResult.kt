@@ -1,8 +1,8 @@
-package com.bugbender.catfacts.searchfacts.data
+package com.bugbender.catfacts.catfacts.data
 
-interface LoadResult {
+sealed interface LoadResult {
 
-    interface Mapper {
+    interface Mapper { //todo use mapper
 
         fun mapSuccess(catFact: CatFact)
 
@@ -11,12 +11,12 @@ interface LoadResult {
 
     fun map(mapper: Mapper)
 
-    data class Success(private val catFact: CatFact) : LoadResult {
+    data class Success(val catFact: CatFact) : LoadResult {
 
         override fun map(mapper: Mapper) = mapper.mapSuccess(catFact = catFact)
     }
 
-    data class Error(private val message: String) : LoadResult {
+    data class Error(val message: String) : LoadResult {
 
         override fun map(mapper: Mapper) = mapper.mapError(message)
     }

@@ -13,10 +13,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.bugbender.catfacts.catfacts.presentation.CatFactsScreen
 import com.bugbender.catfacts.core.presentation.theme.CatFactsTheme
-import com.bugbender.catfacts.searchfacts.presentation.CatFactsScreen
 import com.bugbender.catfacts.splash.SplashScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,13 +39,14 @@ fun CatFactsApp() {
     Scaffold(
         bottomBar = {if(!shouldShowSplashScreen) {} }
     ) { padding ->
+        modifier.padding(padding)
         if (shouldShowSplashScreen) {
             SplashScreen(
                 onFinish = { shouldShowSplashScreen = false },
                 modifier = modifier
             )
         } else {
-            CatFactsScreen(modifier = modifier.padding(padding))
+            CatFactsScreen(modifier = Modifier.padding(padding))
         }
     }
 }

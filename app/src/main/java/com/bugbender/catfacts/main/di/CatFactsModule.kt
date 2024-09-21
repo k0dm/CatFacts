@@ -1,6 +1,6 @@
 package com.bugbender.catfacts.main.di
 
-import com.bugbender.catfacts.searchfacts.data.CatFactsRepository
+import com.bugbender.catfacts.catfacts.data.CatFactsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

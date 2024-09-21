@@ -1,6 +1,6 @@
 package com.bugbender.catfacts.main.di
 
-import com.bugbender.catfacts.searchfacts.data.CatFactsAPI
+import com.bugbender.catfacts.catfacts.data.CatFactsAPI
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,7 +19,7 @@ object RetrofitModule {
     @Singleton
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://meowfacts.herokuapp.com")
+            .baseUrl("https://google.com")
             .addConverterFactory(GsonConverterFactory.create())
             .client(
                 OkHttpClient.Builder()

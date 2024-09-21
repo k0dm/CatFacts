@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.bugbender.catfacts"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.bugbender.catfacts"
@@ -55,7 +55,11 @@ dependencies {
 
     //hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     kapt(libs.hilt.android.compiler)
+
+    //livedata
+    implementation(libs.androidx.runtime.livedata)
 
     //viewModel() in compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
