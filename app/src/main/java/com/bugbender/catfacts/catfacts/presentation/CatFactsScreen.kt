@@ -2,15 +2,20 @@ package com.bugbender.catfacts.catfacts.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bugbender.catfacts.R
 import com.bugbender.catfacts.core.presentation.theme.CatFactsTheme
@@ -37,6 +43,8 @@ fun CatFactsScreen(
     CatFactsContainer(
         state = viewModel.uiState,
         onGetFact = viewModel::catFact,
+        onAddToFavorites = viewModel::addToFavorites,
+        onDeleteFromFavorites = viewModel::deleteFromFavorites,
         modifier = modifier
     )
 }
@@ -45,6 +53,8 @@ fun CatFactsScreen(
 fun CatFactsContainer(
     state: CatFactUiState,
     onGetFact: () -> Unit = {},
+    onAddToFavorites: (String) -> Unit = {},
+    onDeleteFromFavorites: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -71,7 +81,12 @@ fun CatFactsContainer(
                 onGetFact = onGetFact
             )
 
-            is CatFactUiState.Success -> CatFactFrame(fact = state.fact, onGetFact = onGetFact)
+            is CatFactUiState.Success -> CatFactFrame(
+                catFact = state.catFact,
+                onGetFact = onGetFact,
+                onAddToFavorites = onAddToFavorites,
+                onDeleteFromFavorites = onDeleteFromFavorites
+            )
         }
 
     }
@@ -89,17 +104,15 @@ private fun SearchFactsScreenPreview() {
 
 @Composable
 fun GetFactButton(onGetFact: () -> Unit, modifier: Modifier = Modifier) {
-    Row {
-        Button(
-            onClick = onGetFact,
-            shape = RoundedCornerShape(10.dp),
-            modifier = modifier
-        ) {
-            Text(
-                text = stringResource(R.string.new_fact),
-                style = MaterialTheme.typography.titleSmall
-            )
-        }
+    Button(
+        onClick = onGetFact,
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier
+    ) {
+        Text(
+            text = stringResource(R.string.new_fact),
+            style = MaterialTheme.typography.titleSmall
+        )
     }
 }
 
@@ -171,27 +184,62 @@ private fun ErrorFramePreview() {
     }
 }
 
+data class CatFactUi(val text: String, val isFavorite: Boolean)
 
 @Composable
-fun CatFactFrame(fact: String, onGetFact: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Spacer(Modifier.weight(1f))
+fun CatFactFrame(
+    catFact: CatFactUi, onGetFact: () -> Unit,
+    onDeleteFromFavorites: (String) -> Unit,
+    onAddToFavorites: (String) -> Unit
+) {
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+
+        val (factText, getFactButton, iconButton) = createRefs()
+        val bottomGuide = createGuidelineFromBottom(64.dp)
         Text(
-            text = fact,
+            text = catFact.text,
             fontSize = 24.sp,
             color = Color.Black,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
-
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .constrainAs(factText) {
+                    centerVerticallyTo(parent)
+                    centerHorizontallyTo(parent)
+                }
         )
-        Spacer(Modifier.weight(1f))
 
-        GetFactButton(onGetFact = onGetFact, modifier = Modifier.padding(bottom = 64.dp))
+        GetFactButton(
+            onGetFact = onGetFact,
+            modifier = Modifier
+                .constrainAs(getFactButton) {
+                    centerHorizontallyTo(parent)
+                    bottom.linkTo(bottomGuide)
+                }
+        )
+
+        IconButton(
+            onClick = {
+                if (catFact.isFavorite) {
+                    onDeleteFromFavorites(catFact.text)
+                } else {
+                    onAddToFavorites(catFact.text)
+                }
+            },
+            modifier = Modifier
+                .constrainAs(iconButton) {
+                    start.linkTo(getFactButton.end)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(bottomGuide)
+                }
+        ) {
+            Icon(
+                imageVector = if (catFact.isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                contentDescription = stringResource(R.string.favorite_button),
+                modifier = Modifier.size(48.dp)
+            )
+        }
     }
 }
 
@@ -200,9 +248,14 @@ fun CatFactFrame(fact: String, onGetFact: () -> Unit) {
 private fun CatFactFramePreview() {
     CatFactsTheme {
         CatFactFrame(
-            fact = "\"Cats must have fat in their\n" +
-                    "diet because they cannot produce it on their own.\"",
-            onGetFact = {}
+            catFact = CatFactUi(
+                text = "\"Cats must have fat in their\n" +
+                        "diet because they cannot produce it on their own.\"",
+                isFavorite = false
+            ),
+            onGetFact = {},
+            onAddToFavorites = {},
+            onDeleteFromFavorites = {}
         )
     }
 }
