@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CatFactsViewModel @Inject constructor(
-    private val repository: CatFactsRepository
+    private val catFactRepository: CatFactsRepository,
 ) : ViewModel() {
 
     var uiState by mutableStateOf<CatFactUiState>(CatFactUiState.FirstLoading)
@@ -23,21 +23,41 @@ class CatFactsViewModel @Inject constructor(
     fun catFact() {
         uiState = CatFactUiState.Loading
         viewModelScope.launch(Dispatchers.IO) {
-            val result = repository.catFact()
+            val result = catFactRepository.catFact()
 
             withContext(Dispatchers.Main) {
                 uiState = when (result) {
-                    is LoadResult.Success -> CatFactUiState.Success(fact = result.catFact.data)
+                    is LoadResult.Success -> CatFactUiState.Success(
+                        CatFactUi(
+                            text = result.catFact.data,
+                            isFavorite = result.catFact.isFavorite
+                        )
+                    )
+
                     is LoadResult.Error -> CatFactUiState.Error(message = result.message)
                 }
             }
+        }
+    }
+
+    fun addToFavorites(text: String) = viewModelScope.launch(Dispatchers.IO) {
+        catFactRepository.addToFavorites(text)
+        withContext(Dispatchers.Main) {
+            uiState = CatFactUiState.Success(CatFactUi(text = text, isFavorite = true))
+        }
+    }
+
+    fun deleteFromFavorites(text: String) = viewModelScope.launch(Dispatchers.IO) {
+        catFactRepository.deleteFromFavorites(text)
+        withContext(Dispatchers.Main) {
+            uiState = CatFactUiState.Success(CatFactUi(text = text, isFavorite = false))
         }
     }
 }
 
 interface CatFactUiState {
 
-    data class Success(val fact: String) : CatFactUiState
+    data class Success(val catFact: CatFactUi) : CatFactUiState
 
     data class Error(val message: String) : CatFactUiState
 

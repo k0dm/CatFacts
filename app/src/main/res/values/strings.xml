@@ -3,4 +3,6 @@
     <string name="cats_facts">Cat Facts</string>
     <string name="loading_data">Loading data...</string>
     <string name="new_fact">NEW FACT</string>
+    <string name="favorite_button">Favorite button</string>
+    <string name="no_saved_facts">No saved facts!</string>
 </resources>

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     alias(libs.plugins.google.dagger.hilt.android)
+    alias(libs.plugins.devtoolsKsp)
 }
 
 android {
@@ -53,6 +54,7 @@ android {
 
 dependencies {
 
+
     //hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.lifecycle.runtime.compose.android)
@@ -69,6 +71,14 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
 
+    //room +ksp
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    annotationProcessor(libs.androidx.room.room.compiler)
+    ksp(libs.androidx.room.room.compiler)
+
+    //constraintLayout
+    implementation(libs.androidx.constraintlayout.compose)
     //base libs
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
