@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
     alias(libs.plugins.google.dagger.hilt.android)
+    id("kotlin-parcelize")
     alias(libs.plugins.devtoolsKsp)
 }
 
@@ -54,6 +55,8 @@ android {
 
 dependencies {
 
+    //navigation
+//    implementation(libs.androidx.navigation.compose)
 
     //hilt
     implementation(libs.hilt.android)

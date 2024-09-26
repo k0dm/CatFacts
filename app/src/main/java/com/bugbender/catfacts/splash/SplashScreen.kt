@@ -5,8 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +31,7 @@ import com.bugbender.catfacts.core.presentation.theme.CatFactsTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen(
-    modifier: Modifier = Modifier,
-    onFinish: () -> Unit
-) {
+fun SplashScreen(onFinish: () -> Unit) {
     var progress by rememberSaveable { mutableFloatStateOf(0.1f) }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -52,7 +49,7 @@ fun SplashScreen(
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+        modifier = Modifier.systemBarsPadding()
     ) {
         Image(
             painter = painterResource(R.drawable.cat_logo),
@@ -81,6 +78,6 @@ fun SplashScreen(
 @Composable
 private fun SplashScreenPreview() {
     CatFactsTheme {
-        SplashScreen(onFinish = {}, modifier = Modifier.fillMaxSize())
+        SplashScreen(onFinish = {})
     }
 }
