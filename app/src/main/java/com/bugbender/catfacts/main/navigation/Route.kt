@@ -1,4 +1,4 @@
-package com.bugbender.catfacts.core.navigation
+package com.bugbender.catfacts.main.navigation
 
 import android.os.Parcelable
 import androidx.activity.compose.BackHandler
