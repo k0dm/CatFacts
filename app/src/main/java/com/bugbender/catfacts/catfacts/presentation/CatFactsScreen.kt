@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -195,20 +197,30 @@ fun CatFactFrame(
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
         val (factText, getFactButton, iconButton) = createRefs()
+        val topGuide = createGuidelineFromTop(16.dp) // Optional to limit how far the text can go up
         val bottomGuide = createGuidelineFromBottom(64.dp)
-        Text(
-            text = catFact.text,
-            fontSize = 24.sp,
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
+
+        Column(
             modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp)
                 .constrainAs(factText) {
+                    top.linkTo(topGuide)  // Anchored to the top guideline
                     centerVerticallyTo(parent)
                     centerHorizontallyTo(parent)
+                    bottom.linkTo(getFactButton.top, margin = 16.dp)
                 }
-        )
+        ) {
+            Text(
+                text = catFact.text,
+                fontSize = 24.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+
+            )
+        }
 
         GetFactButton(
             onGetFact = onGetFact,
@@ -235,7 +247,9 @@ fun CatFactFrame(
                 }
         ) {
             Icon(
-                imageVector = if (catFact.isFavorite) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                imageVector = if (catFact.isFavorite)
+                    Icons.Rounded.Favorite
+                else Icons.Rounded.FavoriteBorder,
                 contentDescription = stringResource(R.string.favorite_button),
                 modifier = Modifier.size(48.dp)
             )
@@ -250,6 +264,38 @@ private fun CatFactFramePreview() {
         CatFactFrame(
             catFact = CatFactUi(
                 text = "\"Cats must have fat in their\n" +
+                        "diet because they cannot produce it on their own.\"",
+                isFavorite = false
+            ),
+            onGetFact = {},
+            onAddToFavorites = {},
+            onDeleteFromFavorites = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CatFactFrameOverloadPreview() {
+    CatFactsTheme {
+        CatFactFrame(
+            catFact = CatFactUi(
+                text = "\"Cats must have fat in their\n" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
+                        "diet because they cannot produce it on their own.\"" +
                         "diet because they cannot produce it on their own.\"",
                 isFavorite = false
             ),
