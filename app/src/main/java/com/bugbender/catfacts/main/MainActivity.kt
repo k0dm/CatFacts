@@ -19,10 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.bugbender.catfacts.core.navigation.NavigationHost
-import com.bugbender.catfacts.core.navigation.Route
-import com.bugbender.catfacts.core.navigation.rememberNavigation
 import com.bugbender.catfacts.core.presentation.theme.CatFactsTheme
+import com.bugbender.catfacts.main.navigation.NavigationHost
+import com.bugbender.catfacts.main.navigation.Route
+import com.bugbender.catfacts.main.navigation.rememberNavigation
 import com.bugbender.catfacts.splash.SplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
