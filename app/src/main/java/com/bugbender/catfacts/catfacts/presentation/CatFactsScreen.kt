@@ -1,39 +1,38 @@
 package com.bugbender.catfacts.catfacts.presentation
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bugbender.catfacts.R
+import com.bugbender.catfacts.catfacts.presentation.frames.CatFactFrame
+import com.bugbender.catfacts.catfacts.presentation.frames.ErrorFrame
+import com.bugbender.catfacts.catfacts.presentation.frames.LoadingDataFrame
 import com.bugbender.catfacts.core.presentation.theme.CatFactsTheme
 
 @Composable
@@ -42,8 +41,10 @@ fun CatFactsScreen(
     viewModel: CatFactsViewModel = viewModel()
 ) {
 
-    CatFactsContainer(
+    CatFactsContent(
         state = viewModel.uiState,
+        languages = viewModel.languages,
+        onChangeLanguage = viewModel::changeLanguage,
         onGetFact = viewModel::catFact,
         onAddToFavorites = viewModel::addToFavorites,
         onDeleteFromFavorites = viewModel::deleteFromFavorites,
@@ -52,21 +53,85 @@ fun CatFactsScreen(
 }
 
 @Composable
-fun CatFactsContainer(
+fun CatFactsContent(
     state: CatFactUiState,
+    languages: List<Language> = listOf(),
+    onChangeLanguage: (language: Language) -> Unit = {},
     onGetFact: () -> Unit = {},
     onAddToFavorites: (String) -> Unit = {},
     onDeleteFromFavorites: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+
+    var showLanguageDropdownMenu by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.cats_facts),
-            style = MaterialTheme.typography.displayLarge,
-        )
+
+        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
+
+            val (textRef, iconRef, dropdownMenuRef) = createRefs()
+
+            Text(
+                text = stringResource(R.string.cats_facts),
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier.constrainAs(textRef) {
+                    centerHorizontallyTo(parent)
+                    centerVerticallyTo(parent)
+                }
+            )
+            Box(modifier = Modifier.constrainAs(iconRef) {
+                centerVerticallyTo(parent)
+                linkTo(parent.start, parent.end, bias = 1f, endMargin = 8.dp)
+            }) {
+                IconButton(onClick = { showLanguageDropdownMenu = true }) {
+                    Icon(
+                        painter = painterResource(R.drawable.language),
+                        contentDescription = null,
+                        modifier = Modifier.size(36.dp),
+                        tint = Color.Unspecified
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = showLanguageDropdownMenu,
+                    onDismissRequest = { showLanguageDropdownMenu = false },
+                    modifier = Modifier.background(Color(242, 242, 242))
+                ) {
+                    languages.forEach { language ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = language.country, fontSize = 24.sp)
+                            },
+                            onClick = {
+                                onChangeLanguage(language)
+                                showLanguageDropdownMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(language.iconRes),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(36.dp),
+                                    tint = Color.Unspecified
+                                )
+                            },
+                            trailingIcon = {
+                                if (language.chosen) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(36.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+        }
 
         //state.show() todo figure out how to through viewModel
 
@@ -90,218 +155,13 @@ fun CatFactsContainer(
                 onDeleteFromFavorites = onDeleteFromFavorites
             )
         }
-
     }
 }
-
 
 @Preview(showSystemUi = true)
 @Composable
 private fun SearchFactsScreenPreview() {
     CatFactsTheme {
-        CatFactsContainer(state = CatFactUiState.Loading)
-    }
-}
-
-
-@Composable
-fun GetFactButton(onGetFact: () -> Unit, modifier: Modifier = Modifier) {
-    Button(
-        onClick = onGetFact,
-        shape = RoundedCornerShape(10.dp),
-        modifier = modifier
-    ) {
-        Text(
-            text = stringResource(R.string.new_fact),
-            style = MaterialTheme.typography.titleSmall
-        )
-    }
-}
-
-@Composable
-fun LoadingDataFrame() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator(
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            strokeCap = StrokeCap.Round,
-            modifier = Modifier
-                .width(48.dp)
-                .height(48.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.loading_data),
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoadingDataFramePreview() {
-    CatFactsTheme {
-        LoadingDataFrame()
-    }
-}
-
-@Composable
-fun ErrorFrame(
-    errorMessage: String, onGetFact: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = errorMessage,
-            fontSize = 24.sp,
-            color = Color.Red,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-        Spacer(Modifier.weight(1f))
-
-        GetFactButton(onGetFact = onGetFact, modifier = Modifier.padding(bottom = 64.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ErrorFramePreview() {
-    CatFactsTheme {
-        ErrorFrame(
-            errorMessage = "No Internet Connection !!! dsafsdafasdf",
-            onGetFact = {}
-        )
-    }
-}
-
-data class CatFactUi(val text: String, val isFavorite: Boolean)
-
-@Composable
-fun CatFactFrame(
-    catFact: CatFactUi, onGetFact: () -> Unit,
-    onDeleteFromFavorites: (String) -> Unit,
-    onAddToFavorites: (String) -> Unit
-) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-
-        val (factText, getFactButton, iconButton) = createRefs()
-        val topGuide = createGuidelineFromTop(16.dp) // Optional to limit how far the text can go up
-        val bottomGuide = createGuidelineFromBottom(64.dp)
-
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 32.dp)
-                .constrainAs(factText) {
-                    top.linkTo(topGuide)  // Anchored to the top guideline
-                    centerVerticallyTo(parent)
-                    centerHorizontallyTo(parent)
-                    bottom.linkTo(getFactButton.top, margin = 16.dp)
-                }
-        ) {
-            Text(
-                text = catFact.text,
-                fontSize = 24.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-
-            )
-        }
-
-        GetFactButton(
-            onGetFact = onGetFact,
-            modifier = Modifier
-                .constrainAs(getFactButton) {
-                    centerHorizontallyTo(parent)
-                    bottom.linkTo(bottomGuide)
-                }
-        )
-
-        IconButton(
-            onClick = {
-                if (catFact.isFavorite) {
-                    onDeleteFromFavorites(catFact.text)
-                } else {
-                    onAddToFavorites(catFact.text)
-                }
-            },
-            modifier = Modifier
-                .constrainAs(iconButton) {
-                    start.linkTo(getFactButton.end)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(bottomGuide)
-                }
-        ) {
-            Icon(
-                imageVector = if (catFact.isFavorite)
-                    Icons.Rounded.Favorite
-                else Icons.Rounded.FavoriteBorder,
-                contentDescription = stringResource(R.string.favorite_button),
-                modifier = Modifier.size(48.dp)
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CatFactFramePreview() {
-    CatFactsTheme {
-        CatFactFrame(
-            catFact = CatFactUi(
-                text = "\"Cats must have fat in their\n" +
-                        "diet because they cannot produce it on their own.\"",
-                isFavorite = false
-            ),
-            onGetFact = {},
-            onAddToFavorites = {},
-            onDeleteFromFavorites = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CatFactFrameOverloadPreview() {
-    CatFactsTheme {
-        CatFactFrame(
-            catFact = CatFactUi(
-                text = "\"Cats must have fat in their\n" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"" +
-                        "diet because they cannot produce it on their own.\"",
-                isFavorite = false
-            ),
-            onGetFact = {},
-            onAddToFavorites = {},
-            onDeleteFromFavorites = {}
-        )
+        CatFactsContent(state = CatFactUiState.Success(catFact = CatFactUi(text = "Hello", true)))
     }
 }

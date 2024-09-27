@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 interface CatFactsRepository {
 
-    suspend fun catFact(): LoadResult
+    suspend fun catFact(language: String): LoadResult
 
     suspend fun addToFavorites(text: String)
 
@@ -17,9 +17,9 @@ interface CatFactsRepository {
         private val cacheDataSource: FavoritesCacheDataSource
     ) : CatFactsRepository {
 
-        override suspend fun catFact(): LoadResult {
+        override suspend fun catFact(language: String): LoadResult {
             return try {
-                val catFactDTO = api.catFact()
+                val catFactDTO = api.catFact(language)
                 val data = catFactDTO.data[0]
                 val isFavorite = cacheDataSource.contains(text = data)
                 LoadResult.Success(catFact = CatFact(data = data, isFavorite = isFavorite))
