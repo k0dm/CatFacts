@@ -1,6 +1,7 @@
 package com.bugbender.catfacts.features.favorites.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,9 +19,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +42,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bugbender.catfacts.R
 import com.bugbender.catfacts.ui.theme.CatFactsTheme
 import com.bugbender.catfacts.features.favorites.data.FavoriteFact
+import com.bugbender.catfacts.ui.snackbar.SnackbarAction
+import com.bugbender.catfacts.ui.snackbar.SnackbarController
+import com.bugbender.catfacts.ui.snackbar.SnackbarEvent
+import kotlinx.coroutines.launch
 
 @Composable
 fun FavoritesScreen(navigateToCatFacts: () -> Unit) {
@@ -68,13 +77,32 @@ fun FavoritesContent(
         if (facts.isEmpty()) {
             NoSavedFactsFrame(onGoToFacts = onGoToFacts)
         } else {
+            val scope = rememberCoroutineScope()
+            val snackbarMessage = stringResource(R.string.are_you_sure_to_delete)
+            val yes = stringResource(R.string.yes)
             Spacer(Modifier.height(16.dp))
-            LazyColumn {
+            LazyColumn() {
                 items(facts) { item ->
-                    FavoriteFactItem(catFact = item, onDeleteFact = onDeleteItem)
+                    FavoriteFactItem(
+                        catFact = item,
+                        onDeleteButtonClicked = {
+                            scope.launch {
+                                SnackbarController.sendEvent(
+                                    SnackbarEvent(
+                                        message = snackbarMessage,
+                                        action = SnackbarAction(
+                                            name = yes,
+                                            action = { onDeleteItem(item) }
+                                        )
+                                    )
+                                )
+                            }
+                        }
+                    )
                 }
             }
         }
+
     }
 }
 
@@ -103,22 +131,11 @@ fun NoSavedFactsFrame(onGoToFacts: () -> Unit = {}) {
     }
 }
 
-
-@Preview
-@Composable
-private fun FavoritesScreen() {
-    CatFactsTheme {
-        FavoritesScreen()
-    }
-}
-
-@Preview(showSystemUi = true)
 @Composable
 fun FavoriteFactItem(
     catFact: FavoriteFact = FavoriteFact(text = "Of all the species of cats, the domestic cat is the only species able to hold its tail vertically while walking. All species of wild cats hold their talk horizontally or tucked between their legs while walking."),
     onShareFact: () -> Unit = {},
-    onDeleteFact: (catFact: FavoriteFact) -> Unit = {},
-    modifier: Modifier = Modifier
+    onDeleteButtonClicked: () -> Unit,
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -140,7 +157,7 @@ fun FavoriteFactItem(
                     Icon(painter = painterResource(R.drawable.share), contentDescription = null)
                 }
                 Spacer(Modifier.width(24.dp))
-                IconButton(onClick = { onDeleteFact(catFact) }) {
+                IconButton(onClick = onDeleteButtonClicked) {
                     Icon(painter = painterResource(R.drawable.close), contentDescription = null)
                 }
             }

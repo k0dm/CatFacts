@@ -10,4 +10,6 @@
     <string name="go_to_facts">Go to facts</string>
     <string name="search_navigation_icon">Search navigation icon</string>
     <string name="favorites_navigation_icon">Favorites navigation icon</string>
+    <string name="are_you_sure_to_delete">Are you sure to delete?</string>
+    <string name="yes">Yes</string>
 </resources>
