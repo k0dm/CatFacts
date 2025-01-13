@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    id("kotlin-kapt")
-    alias(libs.plugins.google.dagger.hilt.android)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.dagger.hilt)
     id("kotlin-parcelize")
-    alias(libs.plugins.devtoolsKsp)
 }
 
 android {
@@ -43,9 +44,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -55,13 +53,15 @@ android {
 
 dependencies {
 
-    //navigation
-//    implementation(libs.androidx.navigation.compose)
+    // Navigation Compose and Hilt
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    // JSON serialization library, works with the Kotlin serialization plugin
+    implementation(libs.kotlinx.serialization.json)
 
-    //hilt
+    //hilt +ksp
     implementation(libs.hilt.android)
-    implementation(libs.androidx.lifecycle.runtime.compose.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
 
     //livedata
     implementation(libs.androidx.runtime.livedata)
@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout.compose)
     //base libs
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -98,8 +99,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-}
-// Allow references to generated code
-kapt {
-    correctErrorTypes = true
 }

@@ -8,4 +8,6 @@
     <string name="favorite_button">Favorite button</string>
     <string name="no_saved_facts">No saved facts!</string>
     <string name="go_to_facts">Go to facts</string>
+    <string name="search_navigation_icon">Search navigation icon</string>
+    <string name="favorites_navigation_icon">Favorites navigation icon</string>
 </resources>
