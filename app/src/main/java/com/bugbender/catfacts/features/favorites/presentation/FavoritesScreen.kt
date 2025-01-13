@@ -137,7 +137,6 @@ fun NoSavedFactsFrame(onGoToFacts: () -> Unit = {}) {
 @Composable
 fun FavoriteFactItem(
     catFact: FavoriteFact = FavoriteFact(text = "Of all the species of cats, the domestic cat is the only species able to hold its tail vertically while walking. All species of wild cats hold their talk horizontally or tucked between their legs while walking."),
-    onShareFact: () -> Unit = {},
     onDeleteButtonClicked: () -> Unit,
 ) {
     val context = LocalContext.current
